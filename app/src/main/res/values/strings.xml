@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BubblePhoto</string>
+    <string name="button_cancel_text">Отмена</string>
+    <string name="button_save_text">Сохранить</string>
 </resources>
