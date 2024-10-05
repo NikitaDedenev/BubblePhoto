@@ -2,4 +2,6 @@
     <string name="app_name">BubblePhoto</string>
     <string name="button_cancel_text">Отмена</string>
     <string name="button_save_text">Сохранить</string>
+    <string name="startup_button_camera">Сделать фото</string>
+    <string name="startup_button_gallery">Открыть фото</string>
 </resources>
