@@ -9,26 +9,55 @@
     android:background="@color/bg_dark">
 
 
-    <Button
+    <ImageButton
         android:id="@+id/button_camera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/camera"
         android:text="@string/startup_button_camera"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintHorizontal_bias="0.13"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.426" />
+        app:layout_constraintVertical_bias="0.53" />
 
-    <Button
+    <ImageButton
         android:id="@+id/button_gallery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/gallery"
+        android:foregroundGravity="top"
         android:text="@string/startup_button_gallery"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.87"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.521" />
+        app:layout_constraintVertical_bias="0.53" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/montserrat"
+        android:text="@string/startup_button_camera"
+        android:textColor="@color/text_default"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/button_camera"
+        app:layout_constraintStart_toStartOf="@+id/button_camera"
+        app:layout_constraintTop_toBottomOf="@+id/button_camera" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/montserrat"
+        android:text="@string/startup_button_gallery"
+        android:textColor="@color/text_default"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/button_gallery"
+        app:layout_constraintStart_toStartOf="@+id/button_gallery"
+        app:layout_constraintTop_toBottomOf="@+id/button_gallery" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
