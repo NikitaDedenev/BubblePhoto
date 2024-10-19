@@ -1,45 +1,47 @@
 package com.example.bubblephoto;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.View;
+import android.Manifest;
 import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import java.io.File;
-import java.io.IOException;
-
 public class StartupActivity extends AppCompatActivity {
 
-    public void openCamera()
-    {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    final int pic_id = 123;
+    final int CAMERA_PERMISSION_CODE = 100;
 
-        // Проверяем, доступно ли приложение камеры
-        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-            // Создаем файл для сохранения изображения
-            File imageFile = null;
-            try {
-                imageFile = createImageFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-            // Если файл успешно создан
-            if (imageFile != null) {
-                // Получаем URI через FileProvider
-                imageUri = FileProvider.getUriForFile(this, "com.yourpackage.fileprovider", imageFile);
+    public void openCamera() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+        } else {
+            Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(camera_intent, pic_id);
+        }
+    }
 
-                // Передаем URI камере, чтобы она сохранила изображение в этот файл
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == pic_id && resultCode == RESULT_OK) { // Добавлена проверка на результат
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            if (photo != null) { // Проверка на null
+                Intent sendimage = new Intent(StartupActivity.this, MainActivity.class);
+                sendimage.putExtra("BitmapImage", photo);
+                startActivity(sendimage);
+            } else {
+
             }
         }
     }
@@ -49,11 +51,8 @@ public class StartupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_startup);
-
         final ImageButton but_camera = findViewById(R.id.button_camera);
         but_camera.setOnClickListener(v -> {
-            //Open standard phone camera and take image
-            //After passes the image to main_activity
             openCamera();
         });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
