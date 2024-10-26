@@ -166,8 +166,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="@color/bg_buttons" />
 
-    <ImageView
-        android:id="@+id/imageView"
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/photo_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="40dp"

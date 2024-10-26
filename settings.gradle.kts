@@ -16,9 +16,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://www.jitpack.io")
     }
 }
 
 rootProject.name = "BubblePhoto"
 include(":app")
- 

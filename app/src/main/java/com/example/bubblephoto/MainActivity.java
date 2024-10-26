@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.ImageButton;
-//import com.github.chrisbanes.photoview.PhotoView;
+import com.github.chrisbanes.photoview.PhotoView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -58,15 +58,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void SetImage(Bitmap image) {
-        ImageView imageView = findViewById(R.id.imageView);
-        imageView.setImageBitmap(image);
+        PhotoView photoView = findViewById(R.id.photo_view);
+        photoView.setImageBitmap(image);
     }
 
     private void loadImageFromUri(Uri uri) {
-        ImageView imageView = findViewById(R.id.imageView);
+        PhotoView photoView = findViewById(R.id.photo_view);
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-            imageView.setImageBitmap(bitmap);
+            photoView.setImageBitmap(bitmap);
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
