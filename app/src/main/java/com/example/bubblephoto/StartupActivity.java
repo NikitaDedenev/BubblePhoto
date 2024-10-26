@@ -33,6 +33,7 @@ public class StartupActivity extends AppCompatActivity {
     private Uri imageUri; // URI для сохранения изображения
 
     public void openCamera() {
+        imageUri = null;
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
         } else {
@@ -48,6 +49,7 @@ public class StartupActivity extends AppCompatActivity {
 
 
     private void openGallery() {
+        imageUri = null;
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("image/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -55,39 +57,49 @@ public class StartupActivity extends AppCompatActivity {
     }
 
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && data != null) {
-
-            super.onActivityResult(requestCode, resultCode, data);
-
-            if (resultCode == RESULT_OK) {
-                // Обработка результата с камеры
-                if (requestCode == pic_id) {
+        if (resultCode == RESULT_OK) {
+            // Обработка результата с камеры
+            if (requestCode == pic_id) {
+                if (imageUri != null) {
                     Intent sendImage = new Intent(StartupActivity.this, MainActivity.class);
                     sendImage.putExtra("ImageUri", imageUri.toString()); // передаем URI
                     sendImage.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // разрешение на чтение URI
                     startActivity(sendImage);
-                }
+                    finish();
+                } else {
 
-                // Обработка результата из проводника
-                if (requestCode == PICK_IMAGE_REQUEST) {
+                }
+            }
+
+            // Обработка результата из проводника
+            if (requestCode == PICK_IMAGE_REQUEST) {
+                if (data != null) {
                     Uri imageUri = data.getData();
                     if (imageUri != null) {
                         // Grant temporary read permission for the URI
                         getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                         Intent sendImage = new Intent(StartupActivity.this, MainActivity.class);
                         sendImage.putExtra("ImageUri", imageUri.toString()); // Передаём строку URI
                         startActivity(sendImage);
+                        finish();
+                    } else {
+                        //without this and 74str else app doesn't work correctly and I don't know why
                     }
+                } else {
+
                 }
             }
+        } else {
+
         }
     }
 
     // Метод для сохранения Bitmap в файл
+    /*
     private File saveBitmapToFile(Bitmap bitmap, String fileName) throws IOException {
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File imageFile = new File(storageDir, fileName);
@@ -98,6 +110,7 @@ public class StartupActivity extends AppCompatActivity {
 
         return imageFile;
     }
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

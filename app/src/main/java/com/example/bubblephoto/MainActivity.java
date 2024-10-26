@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.widget.Button;
+import android.widget.ImageButton;
+//import com.github.chrisbanes.photoview.PhotoView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -38,6 +41,14 @@ public class MainActivity extends AppCompatActivity {
             Uri imageUri = Uri.parse(imageUriString);
             loadImageFromUri(imageUri);
         }
+
+        final Button but_cancel = findViewById(R.id.button_cancel);
+        but_cancel.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, StartupActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
