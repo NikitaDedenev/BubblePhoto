@@ -9,32 +9,77 @@
     android:background="@color/bg_dark">
 
 
-    <ImageButton
-        android:id="@+id/button_camera"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_buttonsStartTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.44" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_buttonsEndBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.61" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_buttonCameraStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.08" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_buttonCameraEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.45" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_buttonGalleryStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.55" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_buttonGalleryEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.92" />
+
+    <ImageButton
+        android:id="@+id/button_camera"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:background="@drawable/camera"
         android:text="@string/startup_button_camera"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.13"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.53" />
+        app:layout_constraintTop_toBottomOf="@id/guideline_buttonsStartTop"
+        app:layout_constraintLeft_toRightOf="@id/guideline_buttonCameraStart"
+        app:layout_constraintRight_toLeftOf="@id/guideline_buttonCameraEnd"
+        app:layout_constraintBottom_toTopOf="@id/guideline_buttonsEndBottom"
+        />
 
     <ImageButton
         android:id="@+id/button_gallery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:background="@drawable/gallery"
         android:foregroundGravity="top"
         android:text="@string/startup_button_gallery"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.87"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.53" />
+        app:layout_constraintTop_toBottomOf="@id/guideline_buttonsStartTop"
+        app:layout_constraintLeft_toRightOf="@id/guideline_buttonGalleryStart"
+        app:layout_constraintRight_toLeftOf="@id/guideline_buttonGalleryEnd"
+        app:layout_constraintBottom_toTopOf="@id/guideline_buttonsEndBottom" />
 
     <TextView
         android:layout_width="wrap_content"

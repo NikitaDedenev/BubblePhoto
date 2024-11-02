@@ -2,12 +2,15 @@ package com.example.bubblephoto;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.Manifest;
+import android.util.DisplayMetrics;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -98,6 +101,27 @@ public class StartupActivity extends AppCompatActivity {
         }
     }
 
+    private void ReformatSizeElem() {
+        final ImageButton but_camera = findViewById(R.id.button_camera);
+        final ImageButton but_gallery = findViewById(R.id.button_gallery);
+
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        float widthPixels = metrics.widthPixels;
+        float sizeButtons = (float) (widthPixels * 0.37);
+
+        // Изменение параметров для button_gallery
+        ViewGroup.MarginLayoutParams paramsGallery = (ViewGroup.MarginLayoutParams) but_gallery.getLayoutParams();
+        paramsGallery.width = (int) sizeButtons;
+        paramsGallery.height = (int) sizeButtons;
+        but_gallery.setLayoutParams(paramsGallery);
+
+        // Изменение параметров для button_camera
+        ViewGroup.MarginLayoutParams paramsCamera = (ViewGroup.MarginLayoutParams) but_camera.getLayoutParams();
+        paramsCamera.width = (int) sizeButtons;
+        paramsCamera.height = (int) sizeButtons;
+        but_camera.setLayoutParams(paramsCamera);
+    }
+
     // Метод для сохранения Bitmap в файл
     /*
     private File saveBitmapToFile(Bitmap bitmap, String fileName) throws IOException {
@@ -117,6 +141,7 @@ public class StartupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_startup);
+        ReformatSizeElem();
         final ImageButton but_camera = findViewById(R.id.button_camera);
         but_camera.setOnClickListener(v -> {
             openCamera();
