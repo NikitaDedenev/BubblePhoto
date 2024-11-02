@@ -1,7 +1,17 @@
 <resources>
-    <string name="app_name">BubblePhoto</string>
+    <string name="app_name" translatable="false">BubblePhoto</string>
     <string name="button_cancel_text">Отмена</string>
     <string name="button_save_text">Сохранить</string>
     <string name="startup_button_camera">Сделать фото</string>
     <string name="startup_button_gallery">Открыть фото</string>
+    <string name="button_cut_text">Обрезать</string>
+    <string name="button_rotate_text">Повернуть</string>
+    <string name="button_brightness_text">Яркость</string>
+    <string name="button_contrast_text">Контрастность</string>
+    <string name="button_temperature_text">Температура</string>
+    <string name="button_sharpness_text">Резкость</string>
+    <string name="button_exposure_text">Экспозиция</string>
+    <string name="button_blur_text">Размытие</string>
+    <string name="button_filters_text">Фильтры</string>
+    <string name="button_AI_text">AI</string>
 </resources>

@@ -30,21 +30,21 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    /*
+
     public Map<Integer, String> whatsoprDict = new HashMap<Integer, String>();
     private void initializeButtonMap() {
-        whatsoprDict.put(R.id.button_cut, "Cut");
-        whatsoprDict.put(R.id.button_rotate, "Rotate");
-        whatsoprDict.put(R.id.button_brightness, "Brightness");
-        whatsoprDict.put(R.id.button_contrast, "Contrast");
-        whatsoprDict.put(R.id.button_temperature, "Temperature");
-        whatsoprDict.put(R.id.button_sharpness, "Sharpness");
-        whatsoprDict.put(R.id.button_exposure, "Exposure");
-        whatsoprDict.put(R.id.button_filters, "Filters");
-        whatsoprDict.put(R.id.button_blur, "Blur");
-        whatsoprDict.put(R.id.button_AI, "AI");
+        whatsoprDict.put(R.id.button_cut, getString(R.string.button_cut_text));
+        whatsoprDict.put(R.id.button_rotate, getString(R.string.button_rotate_text));
+        whatsoprDict.put(R.id.button_brightness, getString(R.string.button_brightness_text));
+        whatsoprDict.put(R.id.button_contrast, getString(R.string.button_contrast_text));
+        whatsoprDict.put(R.id.button_temperature, getString(R.string.button_temperature_text));
+        whatsoprDict.put(R.id.button_sharpness, getString(R.string.button_sharpness_text));
+        whatsoprDict.put(R.id.button_exposure, getString(R.string.button_exposure_text));
+        whatsoprDict.put(R.id.button_filters, getString(R.string.button_filters_text));
+        whatsoprDict.put(R.id.button_blur, getString(R.string.button_blur_text));
+        whatsoprDict.put(R.id.button_AI, getString(R.string.button_AI_text));
     }
-    */
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         ReformatSizeElem();
         Intent sendImage = getIntent();
 
-        //initializeButtonMap();
+        initializeButtonMap();
         // Проверка, был ли передан Bitmap (из камеры)
         Bitmap bitmapImage = sendImage.getParcelableExtra("BitmapImage");
         if (bitmapImage != null) {
@@ -77,12 +77,58 @@ public class MainActivity extends AppCompatActivity {
             finish();
         });
 
-        /*
+
         final ImageButton but_cut = findViewById(R.id.button_cut);
         but_cut.setOnClickListener(v -> {
-            whatopr.setText("");
+            String action = whatsoprDict.get(R.id.button_cut);
+            whatopr.setText(action);
         });
-         */
+        final ImageButton but_rotate = findViewById(R.id.button_rotate);
+        but_rotate.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_rotate);
+            whatopr.setText(action);
+        });
+        final ImageButton but_brightness = findViewById(R.id.button_brightness);
+        but_brightness.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_brightness);
+            whatopr.setText(action);
+        });
+        final ImageButton but_contrast = findViewById(R.id.button_contrast);
+        but_contrast.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_contrast);
+            whatopr.setText(action);
+        });
+        final ImageButton but_temperature = findViewById(R.id.button_temperature);
+        but_temperature.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_temperature);
+            whatopr.setText(action);
+        });
+        final ImageButton but_sharpness = findViewById(R.id.button_sharpness);
+        but_sharpness.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_sharpness);
+            whatopr.setText(action);
+        });
+        final ImageButton but_exposure = findViewById(R.id.button_exposure);
+        but_exposure.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_exposure);
+            whatopr.setText(action);
+        });
+        final ImageButton but_filters = findViewById(R.id.button_filters);
+        but_filters.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_filters);
+            whatopr.setText(action);
+        });
+        final ImageButton but_blur = findViewById(R.id.button_blur);
+        but_blur.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_blur);
+            whatopr.setText(action);
+        });
+        final ImageButton but_AI = findViewById(R.id.button_AI);
+        but_AI.setOnClickListener(v -> {
+            String action = whatsoprDict.get(R.id.button_AI);
+            whatopr.setText(action);
+        });
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -109,43 +155,34 @@ public class MainActivity extends AppCompatActivity {
 
     private void ReformatSizeElem()
     {
-        int[] buttonIds = {
-                R.id.button_cut,
-                R.id.button_rotate,
-                R.id.button_brightness,
-                R.id.button_contrast,
-                R.id.button_temperature,
-                R.id.button_sharpness,
-                R.id.button_exposure,
-                R.id.button_filters,
-                R.id.button_blur,
-                R.id.button_AI
-        };
 
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         float widthPixels = metrics.widthPixels;
         float sizeButtons = (float) (widthPixels * 0.20);
         float marginButtons = (float) (widthPixels * 0.027);
-        for (int i = 0; i < buttonIds.length; i++) {
-            ImageButton button = findViewById(buttonIds[i]);
+
+        // Итерация по словарю
+        int index = 0;
+        for (Map.Entry<Integer, String> entry : whatsoprDict.entrySet()) {
+            ImageButton button = findViewById(entry.getKey());
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) button.getLayoutParams();
             params.width = (int) sizeButtons;
             params.height = (int) sizeButtons;
 
             // Устанавливаем отступы
-            if (i < buttonIds.length - 1) {
+            if (index < whatsoprDict.size() - 1) {
                 params.setMarginEnd((int) marginButtons);
             } else {
                 params.setMarginEnd(0);
             }
 
             button.setLayoutParams(params);
+            index++;
         }
 
         HorizontalScrollView scrollView = findViewById(R.id.horizontalScrollView);
         ViewGroup.LayoutParams scrollParams = scrollView.getLayoutParams();
         scrollParams.height = (int) sizeButtons;
         scrollView.setLayoutParams(scrollParams);
-
     }
 }
