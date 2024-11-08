@@ -51,10 +51,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        initializeButtonMap();
         ReformatSizeElem();
         Intent sendImage = getIntent();
 
-        initializeButtonMap();
         // Проверка, был ли передан Bitmap (из камеры)
         Bitmap bitmapImage = sendImage.getParcelableExtra("BitmapImage");
         if (bitmapImage != null) {
