@@ -178,11 +178,14 @@
                 android:id="@+id/button_blur"
                 android:layout_width="@dimen/button_size"
                 android:layout_height="@dimen/button_size"
-                android:layout_marginEnd="@dimen/button_margin"
+
                 android:layout_weight="1"
                 android:background="@drawable/blur"
-                app:rippleColor="@color/bg_buttons" />
+                app:rippleColor="@color/bg_buttons"/>
+            <!--android:layout_marginEnd="@dimen/button_margin"-->
 
+
+            <!--
             <ImageButton
                 android:id="@+id/button_AI"
                 android:layout_width="@dimen/button_size"
@@ -190,6 +193,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/ai"
                 app:rippleColor="@color/bg_buttons" />
+              -->
         </LinearLayout>
     </HorizontalScrollView>
 

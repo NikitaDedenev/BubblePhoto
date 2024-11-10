@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         whatsoprDict.put(R.id.button_exposure, getString(R.string.button_exposure_text));
         whatsoprDict.put(R.id.button_filters, getString(R.string.button_filters_text));
         whatsoprDict.put(R.id.button_blur, getString(R.string.button_blur_text));
-        whatsoprDict.put(R.id.button_AI, getString(R.string.button_AI_text));
+        //whatsoprDict.put(R.id.button_AI, getString(R.string.button_AI_text));
     }
 
 
@@ -55,13 +55,11 @@ public class MainActivity extends AppCompatActivity {
         ReformatSizeElem();
         Intent sendImage = getIntent();
 
-        // Проверка, был ли передан Bitmap (из камеры)
         Bitmap bitmapImage = sendImage.getParcelableExtra("BitmapImage");
         if (bitmapImage != null) {
             SetImage(bitmapImage);
         }
 
-        // Проверка, был ли передан URI изображения (из проводника)
         String imageUriString = sendImage.getStringExtra("ImageUri");
         if (imageUriString != null) {
             Uri imageUri = Uri.parse(imageUriString);
@@ -123,11 +121,13 @@ public class MainActivity extends AppCompatActivity {
             String action = whatsoprDict.get(R.id.button_blur);
             whatopr.setText(action);
         });
+        /*
         final ImageButton but_AI = findViewById(R.id.button_AI);
         but_AI.setOnClickListener(v -> {
             String action = whatsoprDict.get(R.id.button_AI);
             whatopr.setText(action);
         });
+         */
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -161,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
         float sizeButtons = (float) (widthPixels * 0.20);
         float marginButtons = (float) (widthPixels * 0.027);
 
-        // Итерация по словарю
         int index = 0;
         for (Map.Entry<Integer, String> entry : whatsoprDict.entrySet()) {
             ImageButton button = findViewById(entry.getKey());
@@ -169,10 +168,10 @@ public class MainActivity extends AppCompatActivity {
             params.width = (int) sizeButtons;
             params.height = (int) sizeButtons;
 
-            // Устанавливаем отступы
-            if (index < whatsoprDict.size() - 1) {
+            if (index < whatsoprDict.size() - 2) {
                 params.setMarginEnd((int) marginButtons);
-            } else {
+            }
+            if (index == whatsoprDict.size()){
                 params.setMarginEnd(0);
             }
 
