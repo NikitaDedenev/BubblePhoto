@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private float buttonWidth;
     private float buttonHeight;
     public Map<Integer, String> whatsoprDict = new HashMap<>();
+    private ImageButton currentActiveButton = null;
+    private Map<ImageButton, Integer> buttonInactiveDrawables = new HashMap<>();
 
     private void initializeButtonMap() {
         whatsoprDict.put(R.id.button_cut, getString(R.string.button_cut_text));
@@ -129,19 +131,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupButtonListener(int buttonId, int inactiveDrawable, int activeDrawable, TextView whatopr) {
         final ImageButton button = findViewById(buttonId);
-        final boolean[] check = {false};
+        buttonInactiveDrawables.put(button, inactiveDrawable); // Сохраняем неактивное изображение для кнопки
 
         button.setOnClickListener(v -> {
             String action = whatsoprDict.get(buttonId);
-            whatopr.setText(action);
 
-            if (check[0]) {
+            // Если текущая кнопка уже активна, сделайте её неактивной
+            if (currentActiveButton == button) {
                 button.setImageResource(inactiveDrawable);
-                whatopr.setText("");
-            } else {
-                button.setImageResource(activeDrawable);
+                currentActiveButton = null;
+                whatopr.setText(""); // Очистить текст, если кнопка деактивирована
+                return;
             }
-            check[0] = !check[0];
+
+            // Сброс предыдущей активной кнопки
+            if (currentActiveButton != null) {
+                Integer previousInactiveDrawable = buttonInactiveDrawables.get(currentActiveButton);
+                if (previousInactiveDrawable != null) {
+                    currentActiveButton.setImageResource(previousInactiveDrawable);
+                }
+            }
+
+            // Установка текущей кнопки как активной
+            button.setImageResource(activeDrawable);
+            currentActiveButton = button;
+            whatopr.setText(action);
 
             // Применение размеров
             applyButtonSize(button);
