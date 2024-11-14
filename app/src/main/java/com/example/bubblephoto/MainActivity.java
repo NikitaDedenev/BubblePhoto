@@ -3,11 +3,14 @@ package com.example.bubblephoto;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -72,12 +75,16 @@ public class MainActivity extends AppCompatActivity {
 
         final TextView whatopr = findViewById(R.id.WhatsOperations);
         final Button but_cancel = findViewById(R.id.button_cancel);
+        adjustTextSize(but_cancel, whatopr);
         but_cancel.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, StartupActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
         });
+
+        final Button but_save = findViewById(R.id.button_save);
+        adjustTextSize(but_save, whatopr);
 
         setupButtonListeners(whatopr);
 
@@ -159,6 +166,38 @@ public class MainActivity extends AppCompatActivity {
 
             // Применение размеров
             applyButtonSize(button);
+        });
+    }
+
+    private void adjustTextSize(final Button button, final TextView textView) {
+        button.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                button.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                String text = button.getText().toString();
+                float textSize = button.getTextSize(); // Получаем текущий размер текста в пикселях
+                int buttonWidth = button.getWidth() - button.getPaddingLeft() - button.getPaddingRight();
+
+                // Создаем Paint для измерения текста
+                Paint paint = new Paint();
+                paint.set(button.getPaint());
+
+                // Измеряем ширину текста
+                float textWidth = paint.measureText(text);
+
+                // Уменьшаем размер текста, пока он не поместится в кнопку
+                while (textWidth > buttonWidth && textSize > 0) {
+                    textSize--;
+                    paint.setTextSize(textSize);
+                    textWidth = paint.measureText(text);
+                }
+
+                // Устанавливаем новый размер текста
+                button.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+
+            }
         });
     }
 

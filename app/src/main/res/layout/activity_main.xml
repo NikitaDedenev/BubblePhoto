@@ -242,6 +242,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textColor="@color/text_default"
+        android:fontFamily="@font/montserrat"
         android:textSize="@dimen/text_size_action"
         app:layout_constraintBottom_toTopOf="@+id/guideline_photoViewStart"
         app:layout_constraintEnd_toEndOf="parent"
