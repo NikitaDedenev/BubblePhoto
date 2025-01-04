@@ -33,6 +33,14 @@
         app:layout_constraintGuide_percent="0.79" />
 
     <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_sliderStartTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="0dp"
+        app:layout_constraintGuide_percent="0.88" />
+
+    <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_scrollStartLeft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -248,6 +256,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@id/guideline_sliderStartTop"
+        app:layout_constraintLeft_toRightOf="@id/guideline_scrollStartLeft"
+        app:layout_constraintRight_toLeftOf="@id/guideline_scrollEndRight"
+    />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

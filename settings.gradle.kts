@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "BubblePhoto"
 include(":app")
+include(":OpenCV")

@@ -9,20 +9,26 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import com.github.chrisbanes.photoview.PhotoView;
+
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import android.opengl.GLSurfaceView;
+import android.media.effect.Effect;
+import android.media.effect.EffectContext;
+import android.media.effect.EffectFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,8 +39,14 @@ public class MainActivity extends AppCompatActivity {
     private float buttonWidth;
     private float buttonHeight;
     public Map<Integer, String> whatsoprDict = new HashMap<>();
+    public Map<Integer, Boolean> hasSlider = new HashMap<>();
     private ImageButton currentActiveButton = null;
     private Map<ImageButton, Integer> buttonInactiveDrawables = new HashMap<>();
+
+    private GLSurfaceView mEffectView;
+    private Effect mEffect;
+    private EffectContext mEffectContext;
+    private SeekBar seekBar;
 
     private void initializeButtonMap() {
         whatsoprDict.put(R.id.button_cut, getString(R.string.button_cut_text));
@@ -46,6 +58,16 @@ public class MainActivity extends AppCompatActivity {
         whatsoprDict.put(R.id.button_exposure, getString(R.string.button_exposure_text));
         whatsoprDict.put(R.id.button_filters, getString(R.string.button_filters_text));
         whatsoprDict.put(R.id.button_blur, getString(R.string.button_blur_text));
+
+        hasSlider.put(R.id.button_cut, false);
+        hasSlider.put(R.id.button_rotate, true);
+        hasSlider.put(R.id.button_brightness, true);
+        hasSlider.put(R.id.button_contrast, true);
+        hasSlider.put(R.id.button_temperature, true);
+        hasSlider.put(R.id.button_sharpness, true);
+        hasSlider.put(R.id.button_exposure, true);
+        hasSlider.put(R.id.button_filters, false);
+        hasSlider.put(R.id.button_blur, true);
     }
 
     @Override
@@ -67,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
             SetImage(bitmapImage);
         }
 
+        mEffectView = new GLSurfaceView(this);
+
         String imageUriString = sendImage.getStringExtra("ImageUri");
         if (imageUriString != null) {
             Uri imageUri = Uri.parse(imageUriString);
@@ -83,10 +107,13 @@ public class MainActivity extends AppCompatActivity {
             finish();
         });
 
+
         final Button but_save = findViewById(R.id.button_save);
         adjustTextSize(but_save, whatopr);
 
         setupButtonListeners(whatopr);
+
+        seekBar = findViewById(R.id.seekBar);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -147,7 +174,13 @@ public class MainActivity extends AppCompatActivity {
             if (currentActiveButton == button) {
                 button.setImageResource(inactiveDrawable);
                 currentActiveButton = null;
-                whatopr.setText(""); // Очистить текст, если кнопка деактивирована
+                whatopr.setText("");
+
+                // Скрываем SeekBar и возвращаем Guideline в исходное положение
+                moveGuideline(0.79f);
+                if (hasSlider.get(buttonId)) {
+                    seekBar.setVisibility(View.INVISIBLE);
+                }
                 return;
             }
 
@@ -164,8 +197,40 @@ public class MainActivity extends AppCompatActivity {
             currentActiveButton = button;
             whatopr.setText(action);
 
+            if (hasSlider.get(buttonId)) {
+                moveGuideline(0.75f);
+                seekBar.setVisibility(View.VISIBLE);
+            }
+            else {
+                moveGuideline(0.79f);
+                seekBar.setVisibility(View.INVISIBLE);
+            }
+
             // Применение размеров
             applyButtonSize(button);
+
+            // Вызов функции, связанной с кнопкой
+            if (buttonId == R.id.button_cut) {
+                performCutOperation();
+            } else if (buttonId == R.id.button_rotate) {
+                performRotateOperation();
+            } else if (buttonId == R.id.button_brightness) {
+                performBrightnessOperation();
+            } else if (buttonId == R.id.button_contrast) {
+                performContrastOperation();
+            } else if (buttonId == R.id.button_temperature) {
+                performTemperatureOperation();
+            } else if (buttonId == R.id.button_sharpness) {
+                performSharpnessOperation();
+            } else if (buttonId == R.id.button_exposure) {
+                performExposureOperation();
+            } else if (buttonId == R.id.button_filters) {
+                performFiltersOperation();
+            } else if (buttonId == R.id.button_blur) {
+                performBlurOperation();
+            } else {
+                throw new IllegalStateException("Unexpected value: " + buttonId);
+            }
         });
     }
 
@@ -216,4 +281,50 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void moveGuideline(float percent) {
+        androidx.constraintlayout.widget.Guideline guideline = findViewById(R.id.guideline_scrollStartTop);
+        androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params =
+                (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) guideline.getLayoutParams();
+        params.guidePercent = percent; // например, 0.75f
+        guideline.setLayoutParams(params);
+    }
+
+
+    private void performCutOperation() {
+
+    }
+
+    private void performRotateOperation() {
+
+    }
+
+    private void performBrightnessOperation() {
+
+    }
+
+    private void performContrastOperation() {
+
+    }
+
+    private void performTemperatureOperation() {
+
+    }
+
+    private void performSharpnessOperation() {
+
+    }
+
+    private void performExposureOperation() {
+
+    }
+
+    private void performFiltersOperation() {
+
+    }
+
+    private void performBlurOperation() {
+
+    }
+
 }
