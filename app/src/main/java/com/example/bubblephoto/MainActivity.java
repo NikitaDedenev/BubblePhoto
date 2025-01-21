@@ -3,6 +3,9 @@ package com.example.bubblephoto;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,20 +18,17 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
-import com.github.chrisbanes.photoview.PhotoView;
-
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import android.opengl.GLSurfaceView;
-import android.media.effect.Effect;
-import android.media.effect.EffectContext;
-import android.media.effect.EffectFactory;
+
+import com.github.chrisbanes.photoview.PhotoView;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,11 +42,9 @@ public class MainActivity extends AppCompatActivity {
     public Map<Integer, Boolean> hasSlider = new HashMap<>();
     private ImageButton currentActiveButton = null;
     private Map<ImageButton, Integer> buttonInactiveDrawables = new HashMap<>();
-
-    private GLSurfaceView mEffectView;
-    private Effect mEffect;
-    private EffectContext mEffectContext;
     private SeekBar seekBar;
+    private Bitmap mCurrentBitmap;
+    private Bitmap mOriginalBitmap;
 
     private void initializeButtonMap() {
         whatsoprDict.put(R.id.button_cut, getString(R.string.button_cut_text));
@@ -77,10 +75,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initializeButtonMap();
 
-        // Инициализация размеров кнопок
         initializeButtonSizes();
-
-        // Установка размеров кнопок
         ReformatSizeElem();
 
         Intent sendImage = getIntent();
@@ -88,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
         if (bitmapImage != null) {
             SetImage(bitmapImage);
         }
-
-        mEffectView = new GLSurfaceView(this);
 
         String imageUriString = sendImage.getStringExtra("ImageUri");
         if (imageUriString != null) {
@@ -107,12 +100,10 @@ public class MainActivity extends AppCompatActivity {
             finish();
         });
 
-
         final Button but_save = findViewById(R.id.button_save);
         adjustTextSize(but_save, whatopr);
 
         setupButtonListeners(whatopr);
-
         seekBar = findViewById(R.id.seekBar);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -125,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     private void initializeButtonSizes() {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         buttonWidth = metrics.widthPixels * 0.20f;
-        buttonHeight = buttonWidth; // Если высота и ширина одинаковы
+        buttonHeight = buttonWidth;
     }
 
     private void ReformatSizeElem() {
@@ -165,18 +156,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupButtonListener(int buttonId, int inactiveDrawable, int activeDrawable, TextView whatopr) {
         final ImageButton button = findViewById(buttonId);
-        buttonInactiveDrawables.put(button, inactiveDrawable); // Сохраняем неактивное изображение для кнопки
+        buttonInactiveDrawables.put(button, inactiveDrawable);
 
         button.setOnClickListener(v -> {
             String action = whatsoprDict.get(buttonId);
 
-            // Если текущая кнопка уже активна, сделайте её неактивной
             if (currentActiveButton == button) {
                 button.setImageResource(inactiveDrawable);
                 currentActiveButton = null;
                 whatopr.setText("");
-
-                // Скрываем SeekBar и возвращаем Guideline в исходное положение
                 moveGuideline(0.79f);
                 if (hasSlider.get(buttonId)) {
                     seekBar.setVisibility(View.INVISIBLE);
@@ -184,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Сброс предыдущей активной кнопки
             if (currentActiveButton != null) {
                 Integer previousInactiveDrawable = buttonInactiveDrawables.get(currentActiveButton);
                 if (previousInactiveDrawable != null) {
@@ -192,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            // Установка текущей кнопки как активной
             button.setImageResource(activeDrawable);
             currentActiveButton = button;
             whatopr.setText(action);
@@ -200,16 +186,13 @@ public class MainActivity extends AppCompatActivity {
             if (hasSlider.get(buttonId)) {
                 moveGuideline(0.75f);
                 seekBar.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 moveGuideline(0.79f);
                 seekBar.setVisibility(View.INVISIBLE);
             }
 
-            // Применение размеров
             applyButtonSize(button);
 
-            // Вызов функции, связанной с кнопкой
             if (buttonId == R.id.button_cut) {
                 performCutOperation();
             } else if (buttonId == R.id.button_rotate) {
@@ -228,8 +211,6 @@ public class MainActivity extends AppCompatActivity {
                 performFiltersOperation();
             } else if (buttonId == R.id.button_blur) {
                 performBlurOperation();
-            } else {
-                throw new IllegalStateException("Unexpected value: " + buttonId);
             }
         });
     }
@@ -241,41 +222,38 @@ public class MainActivity extends AppCompatActivity {
                 button.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
                 String text = button.getText().toString();
-                float textSize = button.getTextSize(); // Получаем текущий размер текста в пикселях
+                float textSize = button.getTextSize();
                 int buttonWidth = button.getWidth() - button.getPaddingLeft() - button.getPaddingRight();
 
-                // Создаем Paint для измерения текста
                 Paint paint = new Paint();
                 paint.set(button.getPaint());
-
-                // Измеряем ширину текста
                 float textWidth = paint.measureText(text);
 
-                // Уменьшаем размер текста, пока он не поместится в кнопку
                 while (textWidth > buttonWidth && textSize > 0) {
                     textSize--;
                     paint.setTextSize(textSize);
                     textWidth = paint.measureText(text);
                 }
 
-                // Устанавливаем новый размер текста
                 button.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-
             }
         });
     }
 
     private void SetImage(Bitmap image) {
         PhotoView photoView = findViewById(R.id.photo_view);
-        photoView.setImageBitmap(image);
+        mOriginalBitmap = image;
+        mCurrentBitmap = image.copy(image.getConfig(), true);
+        photoView.setImageBitmap(mCurrentBitmap);
     }
 
     private void loadImageFromUri(Uri uri) {
         PhotoView photoView = findViewById(R.id.photo_view);
         try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-            photoView.setImageBitmap(bitmap);
+            mOriginalBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+            mCurrentBitmap = mOriginalBitmap.copy(mOriginalBitmap.getConfig(), true);
+            photoView.setImageBitmap(mCurrentBitmap);
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
@@ -286,45 +264,177 @@ public class MainActivity extends AppCompatActivity {
         androidx.constraintlayout.widget.Guideline guideline = findViewById(R.id.guideline_scrollStartTop);
         androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params =
                 (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) guideline.getLayoutParams();
-        params.guidePercent = percent; // например, 0.75f
+        params.guidePercent = percent;
         guideline.setLayoutParams(params);
     }
 
-
     private void performCutOperation() {
-
+        // Implement cut operation
     }
 
     private void performRotateOperation() {
+        seekBar.setMax(360);
+        seekBar.setProgress(0);
 
-    }
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    PhotoView photoView = findViewById(R.id.photo_view);
+                    photoView.setRotation(progress);
+                }
+            }
 
-    private void performBrightnessOperation() {
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     private void performContrastOperation() {
+        seekBar.setMax(200);
+        seekBar.setMin(40);
+        seekBar.setProgress(100);
 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mOriginalBitmap != null) {
+                    float contrast = progress / 100f;
+                    mCurrentBitmap = ImageProcessor.adjustContrast(mOriginalBitmap, contrast);
+                    PhotoView photoView = findViewById(R.id.photo_view);
+                    photoView.setImageBitmap(mCurrentBitmap);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+    }
+
+    private void performBrightnessOperation() {
+        seekBar.setMax(200);
+        seekBar.setProgress(100);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mOriginalBitmap != null) {
+                    float brightness = (progress - 100) * 1.5f;
+                    mCurrentBitmap = ImageProcessor.adjustBrightness(mOriginalBitmap, brightness);
+                    PhotoView photoView = findViewById(R.id.photo_view);
+                    photoView.setImageBitmap(mCurrentBitmap);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     private void performTemperatureOperation() {
+        seekBar.setMax(200);
+        seekBar.setProgress(100);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mOriginalBitmap != null) {
+                    float temperature = (progress - 100) * 1.5f;
+                    mCurrentBitmap = ImageProcessor.adjustTemperature(mOriginalBitmap, temperature);
+                    PhotoView photoView = findViewById(R.id.photo_view);
+                    photoView.setImageBitmap(mCurrentBitmap);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
 
     }
 
     private void performSharpnessOperation() {
+        seekBar.setMax(100);
+        seekBar.setProgress(0);
 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mOriginalBitmap != null) {
+                    float sharpness = progress / 400f; // Преобразуем значение в диапазон 0-0.25
+                    mCurrentBitmap = ImageProcessor.adjustSharpness(mOriginalBitmap, sharpness);
+                    PhotoView photoView = findViewById(R.id.photo_view);
+                    photoView.setImageBitmap(mCurrentBitmap);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     private void performExposureOperation() {
+        seekBar.setMax(200);
+        seekBar.setMin(30);
+        seekBar.setProgress(85);
 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mOriginalBitmap != null) {
+                    float exposure = progress - 100;
+                    mCurrentBitmap = ImageProcessor.adjustExposure(mOriginalBitmap, exposure);
+                    PhotoView photoView = findViewById(R.id.photo_view);
+                    photoView.setImageBitmap(mCurrentBitmap);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     private void performFiltersOperation() {
-
+        // Implement filters operation
     }
 
     private void performBlurOperation() {
+        seekBar.setMax(100);
+        seekBar.setProgress(0);
 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mOriginalBitmap != null) {
+                    float radius = progress * 0.5f;
+                    mCurrentBitmap = ImageProcessor.adjustBlur(mOriginalBitmap, radius);
+                    PhotoView photoView = findViewById(R.id.photo_view);
+                    photoView.setImageBitmap(mCurrentBitmap);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
-
 }
