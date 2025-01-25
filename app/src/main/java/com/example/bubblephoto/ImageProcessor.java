@@ -7,6 +7,8 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.BlurMaskFilter;
 
+import kotlin.contracts.Effect;
+
 public class ImageProcessor {
 
     public static Bitmap adjustContrast(Bitmap original, float contrast) {
@@ -177,5 +179,46 @@ public class ImageProcessor {
 
         section.recycle();
         return bitmap;
+    }
+
+    public static Bitmap rotateBitmap(Bitmap original, float degrees) {
+        if (original == null) return null;
+
+        int width = original.getWidth();
+        int height = original.getHeight();
+
+        double radians = Math.toRadians(degrees);
+        double sin = Math.abs(Math.sin(radians));
+        double cos = Math.abs(Math.cos(radians));
+
+        int newWidth = (int) Math.floor(width * cos + height * sin);
+        int newHeight = (int) Math.floor(height * cos + width * sin);
+
+        float scale = Math.max(
+                (float) width / Math.min(width, height),
+                (float) height / Math.min(width, height)
+        );
+
+        scale *= Math.max(
+                (float) newWidth / width,
+                (float) newHeight / height
+        );
+
+        Bitmap rotatedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(rotatedBitmap);
+
+        canvas.translate(width / 2f, height / 2f);
+        canvas.rotate(degrees);
+        canvas.scale(scale, scale);
+        canvas.translate(-width / 2f, -height / 2f);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+
+        canvas.drawBitmap(original, 0, 0, paint);
+
+        return rotatedBitmap;
     }
 }

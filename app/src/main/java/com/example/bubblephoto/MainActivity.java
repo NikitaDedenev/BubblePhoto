@@ -121,6 +121,17 @@ public class MainActivity extends AppCompatActivity {
                 PhotoView photoView = findViewById(R.id.photo_view);
                 photoView.setImageBitmap(mOriginalBitmap);
 
+                if (currentActiveButton != null) {
+                    Integer inactiveDrawable = buttonInactiveDrawables.get(currentActiveButton);
+                    if (inactiveDrawable != null) {
+                        currentActiveButton.setImageResource(inactiveDrawable);
+                    }
+                    currentActiveButton = null;
+                    whatopr.setText("");
+                    seekBar.setVisibility(View.INVISIBLE);
+                    moveGuideline(0.79f);
+                }
+
                 changesApplied = true;
                 button_save.setEnabled(true);
                 button_save.setTextColor(getResources().getColor(R.color.text_default));
@@ -290,15 +301,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void enableSaveButton(){
+    private void enableSaveButton() {
         final Button button_save = findViewById(R.id.button_save);
-        if (!hasChanges)
-        {
-            hasChanges = true;
-            changesApplied = false;
-            button_save.setEnabled(true);
-            button_save.setTextColor(getResources().getColor(R.color.text_enable));
-        }
+        hasChanges = true;
+        changesApplied = false;
+        button_save.setEnabled(true);
+        button_save.setTextColor(getResources().getColor(R.color.text_enable));
     }
 
     private void saveImage() {
@@ -362,16 +370,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void performRotateOperation() {
         seekBar.setMax(360);
+        seekBar.setMin(0);
         seekBar.setProgress(0);
 
+        final PhotoView photoView = findViewById(R.id.photo_view);
+        photoView.setRotation(0);
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            private float lastRotation = 0;
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    PhotoView photoView = findViewById(R.id.photo_view);
-                    photoView.setRotation(progress);
+                    if (progress == 0 && mOriginalBitmap != null) {
+                        mCurrentBitmap = mOriginalBitmap.copy(mOriginalBitmap.getConfig(), true);
+                        photoView.setImageBitmap(mCurrentBitmap);
+                        enableSaveButton();
+                    } else {
+                        mCurrentBitmap = ImageProcessor.rotateBitmap(mOriginalBitmap, progress);
+                        photoView.setImageBitmap(mCurrentBitmap);
+                        enableSaveButton();
+                    }
+                    lastRotation = progress;
                 }
-                enableSaveButton();
             }
 
             @Override
