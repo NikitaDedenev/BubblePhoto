@@ -25,14 +25,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
-
 import com.github.chrisbanes.photoview.PhotoView;
 
 import java.io.IOException;
@@ -480,24 +472,24 @@ public class MainActivity extends AppCompatActivity {
     private void performSharpnessOperation() {
         seekBar.setMax(100);
         seekBar.setProgress(0);
+        seekBar.setMin(0);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if (mOriginalBitmap != null) {
-                    float sharpness = seekBar.getProgress() / 100f * 5f;
-                    mCurrentBitmap = ImageProcessor.adjustSharpness(mOriginalBitmap, sharpness);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mOriginalBitmap != null) {
+                    mCurrentBitmap = ImageProcessor.adjustSharpness(mOriginalBitmap, progress);
                     PhotoView photoView = findViewById(R.id.photo_view);
                     photoView.setImageBitmap(mCurrentBitmap);
                     enableSaveButton();
                 }
             }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
 

@@ -1,13 +1,11 @@
 package com.example.bubblephoto;
 
 import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.graphics.BlurMaskFilter;
-
-import kotlin.contracts.Effect;
 
 public class ImageProcessor {
 
@@ -101,30 +99,58 @@ public class ImageProcessor {
 
     public static Bitmap adjustSharpness(Bitmap original, float sharpness) {
         if (original == null) return null;
-
+        float normalizedSharpness = sharpness / 100f;
         Bitmap adjustedBitmap = Bitmap.createBitmap(
                 original.getWidth(),
                 original.getHeight(),
-                Bitmap.Config.ARGB_8888
-        );
+                Bitmap.Config.ARGB_8888);
 
-        Canvas canvas = new Canvas(adjustedBitmap);
-        Paint paint = new Paint();
-        ColorMatrix cm = new ColorMatrix();
+        int[] pixels = new int[original.getWidth() * original.getHeight()];
+        original.getPixels(pixels, 0, original.getWidth(), 0, 0,
+                original.getWidth(), original.getHeight());
 
-        float normalizedSharpness = sharpness / 10f;
-
-        float[] matrix = {
-                1 + normalizedSharpness, -normalizedSharpness/2, -normalizedSharpness/2, 0, 0,
-                -normalizedSharpness/2, 1 + normalizedSharpness, -normalizedSharpness/2, 0, 0,
-                -normalizedSharpness/2, -normalizedSharpness/2, 1 + normalizedSharpness, 0, 0,
-                0, 0, 0, 1, 0
+        float center = 1.0f + (4.0f * normalizedSharpness);
+        float outer = -normalizedSharpness;
+        float[] kernel = {
+                0,    outer, 0,
+                outer, center, outer,
+                0,    outer, 0
         };
 
-        cm.set(matrix);
-        paint.setColorFilter(new ColorMatrixColorFilter(cm));
-        canvas.drawBitmap(original, 0, 0, paint);
+        int width = original.getWidth();
+        int height = original.getHeight();
+        int[] result = new int[pixels.length];
 
+        System.arraycopy(pixels, 0, result, 0, pixels.length);
+
+        for (int y = 1; y < height - 1; y++) {
+            for (int x = 1; x < width - 1; x++) {
+                int index = y * width + x;
+
+                float red = 0, green = 0, blue = 0;
+                int alpha = pixels[index] & 0xff000000;
+                for (int ky = -1; ky <= 1; ky++) {
+                    for (int kx = -1; kx <= 1; kx++) {
+                        int pos = (y + ky) * width + (x + kx);
+                        float kernelValue = kernel[(ky + 1) * 3 + (kx + 1)];
+
+                        red += ((pixels[pos] >> 16) & 0xff) * kernelValue;
+                        green += ((pixels[pos] >> 8) & 0xff) * kernelValue;
+                        blue += (pixels[pos] & 0xff) * kernelValue;
+                    }
+                }
+
+                red = Math.min(Math.max(red, 0), 255);
+                green = Math.min(Math.max(green, 0), 255);
+                blue = Math.min(Math.max(blue, 0), 255);
+                result[index] = alpha |
+                        ((int)red << 16) |
+                        ((int)green << 8) |
+                        (int)blue;
+            }
+        }
+
+        adjustedBitmap.setPixels(result, 0, width, 0, 0, width, height);
         return adjustedBitmap;
     }
 
