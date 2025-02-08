@@ -193,6 +193,11 @@ public class MainActivity extends AppCompatActivity {
 
         button.setOnClickListener(v -> {
             String action = whatsoprDict.get(buttonId);
+            DrawingView drawingView = findViewById(R.id.drawing_view);
+            if (drawingView != null) {
+                drawingView.setDrawingEnabled(false);
+                drawingView.setVisibility(View.GONE);
+            }
 
             if (currentActiveButton == button) {
                 button.setImageResource(inactiveDrawable);
@@ -247,6 +252,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void adjustTextSize(final Button button, final TextView textView) {
         button.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -529,6 +536,7 @@ public class MainActivity extends AppCompatActivity {
 
         DrawingView drawingView = findViewById(R.id.drawing_view);
         PhotoView photoView = findViewById(R.id.photo_view);
+        drawingView.setVisibility(View.VISIBLE);
         drawingView.setDrawingEnabled(true);
         drawingView.setBrushSize(seekBar.getProgress());
 
