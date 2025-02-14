@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private Bitmap mCurrentBitmap;
     private Bitmap mOriginalBitmap;
+    private RectF cropRect;
 
     boolean hasChanges = false;
     boolean changesApplied = false;
@@ -108,9 +110,57 @@ public class MainActivity extends AppCompatActivity {
         button_save.setTextColor(getResources().getColor(R.color.text_disable));
 
         button_save.setOnClickListener(v -> {
+            CropOverlayView cropOverlay = findViewById(R.id.crop_overlay);
+            PhotoView photoView = findViewById(R.id.photo_view);
+            if (cropOverlay.getVisibility() == View.VISIBLE) {
+                RectF cropRect = cropOverlay.getCropRect();
+
+                float viewWidth = photoView.getWidth();
+                float viewHeight = photoView.getHeight();
+                float imageWidth = mCurrentBitmap.getWidth();
+                float imageHeight = mCurrentBitmap.getHeight();
+
+                float scaleX = imageWidth / viewWidth;
+                float scaleY = imageHeight / viewHeight;
+
+                int left = Math.max(0, (int) (cropRect.left * scaleX));
+                int top = Math.max(0, (int) (cropRect.top * scaleY));
+                int width = Math.min((int) (cropRect.width() * scaleX), mCurrentBitmap.getWidth() - left);
+                int height = Math.min((int) (cropRect.height() * scaleY), mCurrentBitmap.getHeight() - top);
+
+                try {
+                    Bitmap croppedBitmap = Bitmap.createBitmap(
+                            mCurrentBitmap,
+                            left,
+                            top,
+                            width,
+                            height
+                    );
+
+                    mCurrentBitmap = croppedBitmap;
+                    mOriginalBitmap = mCurrentBitmap.copy(mCurrentBitmap.getConfig(), true);
+                    photoView.setImageBitmap(mCurrentBitmap);
+                    cropOverlay.setVisibility(View.GONE);
+
+                    changesApplied = true;
+                    button_save.setEnabled(false);
+                    button_save.setTextColor(getResources().getColor(R.color.text_disable));
+
+                    if (currentActiveButton != null) {
+                        Integer inactiveDrawable = buttonInactiveDrawables.get(currentActiveButton);
+                        if (inactiveDrawable != null) {
+                            currentActiveButton.setImageResource(inactiveDrawable);
+                        }
+                        currentActiveButton = null;
+                    }
+                    return;
+                } catch (IllegalArgumentException e) {
+                    Toast.makeText(this, "Ошибка при обрезке изображения", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
             if (!changesApplied) {
                 mOriginalBitmap = mCurrentBitmap.copy(mCurrentBitmap.getConfig(), true);
-                PhotoView photoView = findViewById(R.id.photo_view);
                 photoView.setImageBitmap(mOriginalBitmap);
 
                 if (currentActiveButton != null) {
@@ -125,8 +175,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 changesApplied = true;
-                button_save.setEnabled(true);
-                button_save.setTextColor(getResources().getColor(R.color.text_default));
+                button_save.setEnabled(false);
+                button_save.setTextColor(getResources().getColor(R.color.text_disable));
             } else {
                 saveImage();
                 hasChanges = false;
@@ -363,8 +413,65 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performCutOperation() {
-        // Implement cut operation
-        //enableSaveButton();
+        CropOverlayView cropOverlay = findViewById(R.id.crop_overlay);
+        PhotoView photoView = findViewById(R.id.photo_view);
+
+        if (mCurrentBitmap == null) {
+            Toast.makeText(this, "Сначала выберите изображение", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DrawingView drawingView = findViewById(R.id.drawing_view);
+        if (drawingView != null) {
+            drawingView.setVisibility(View.GONE);
+            drawingView.setDrawingEnabled(false);
+        }
+
+        if (cropOverlay.getVisibility() == View.VISIBLE) {
+            // Применяем обрезку
+            RectF cropRect = cropOverlay.getCropRect();
+
+            float viewWidth = photoView.getWidth();
+            float viewHeight = photoView.getHeight();
+            float imageWidth = mCurrentBitmap.getWidth();
+            float imageHeight = mCurrentBitmap.getHeight();
+
+            float scaleX = imageWidth / viewWidth;
+            float scaleY = imageHeight / viewHeight;
+
+            int left = Math.max(0, (int) (cropRect.left * scaleX));
+            int top = Math.max(0, (int) (cropRect.top * scaleY));
+            int width = Math.min((int) (cropRect.width() * scaleX), mCurrentBitmap.getWidth() - left);
+            int height = Math.min((int) (cropRect.height() * scaleY), mCurrentBitmap.getHeight() - top);
+
+            try {
+                Bitmap croppedBitmap = Bitmap.createBitmap(
+                        mCurrentBitmap,
+                        left,
+                        top,
+                        width,
+                        height
+                );
+
+                mCurrentBitmap = croppedBitmap;
+                photoView.setImageBitmap(mCurrentBitmap);
+                cropOverlay.setVisibility(View.GONE);
+
+                hasChanges = true;
+                changesApplied = false;
+                enableSaveButton();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(this, "Ошибка при обрезке изображения", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            cropOverlay.setVisibility(View.VISIBLE);
+            cropOverlay.resetCropRect();
+            cropOverlay.setOnCropChangeListener(rect -> {
+                hasChanges = true;
+                changesApplied = false;
+                enableSaveButton();
+            });
+        }
     }
 
     private void performRotateOperation() {

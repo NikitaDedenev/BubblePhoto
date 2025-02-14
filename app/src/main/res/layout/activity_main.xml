@@ -91,6 +91,16 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
+    <com.example.bubblephoto.CropOverlayView
+        android:id="@+id/crop_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/guideline_photoViewEnd"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_photoViewStart" />
+
     <com.example.bubblephoto.DrawingView
         android:id="@+id/drawing_view"
         android:layout_width="0dp"
@@ -99,6 +109,8 @@
         app:layout_constraintBottom_toTopOf="@id/guideline_photoViewEnd"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+
 
     <HorizontalScrollView
         android:id="@+id/horizontalScrollView"
