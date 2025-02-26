@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
     boolean hasChanges = false;
     boolean changesApplied = false;
+    private boolean isCropActive = false;
+    private RectF lastCropRect = null;
 
     private void initializeButtonMap() {
         whatsoprDict.put(R.id.button_cut, getString(R.string.button_cut_text));
@@ -141,10 +143,12 @@ public class MainActivity extends AppCompatActivity {
                     mOriginalBitmap = mCurrentBitmap.copy(mCurrentBitmap.getConfig(), true);
                     photoView.setImageBitmap(mCurrentBitmap);
                     cropOverlay.setVisibility(View.GONE);
+                    isCropActive = false;
+                    lastCropRect = null;
 
                     changesApplied = true;
-                    button_save.setEnabled(false);
-                    button_save.setTextColor(getResources().getColor(R.color.text_disable));
+                    button_save.setEnabled(true);
+                    button_save.setTextColor(getResources().getColor(R.color.text_default));
 
                     if (currentActiveButton != null) {
                         Integer inactiveDrawable = buttonInactiveDrawables.get(currentActiveButton);
@@ -152,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
                             currentActiveButton.setImageResource(inactiveDrawable);
                         }
                         currentActiveButton = null;
+                        whatopr.setText("");
                     }
                     return;
                 } catch (IllegalArgumentException e) {
@@ -159,9 +164,10 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
             }
+
             if (!changesApplied) {
                 mOriginalBitmap = mCurrentBitmap.copy(mCurrentBitmap.getConfig(), true);
-                photoView.setImageBitmap(mOriginalBitmap);
+                photoView.setImageBitmap(mCurrentBitmap);
 
                 if (currentActiveButton != null) {
                     Integer inactiveDrawable = buttonInactiveDrawables.get(currentActiveButton);
@@ -175,8 +181,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 changesApplied = true;
-                button_save.setEnabled(false);
-                button_save.setTextColor(getResources().getColor(R.color.text_disable));
+                button_save.setEnabled(true);
+                button_save.setTextColor(getResources().getColor(R.color.text_default));
             } else {
                 saveImage();
                 hasChanges = false;
@@ -240,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupButtonListener(int buttonId, int inactiveDrawable, int activeDrawable, TextView whatopr) {
         final ImageButton button = findViewById(buttonId);
         buttonInactiveDrawables.put(button, inactiveDrawable);
+        final Button button_save = findViewById(R.id.button_save);
 
         button.setOnClickListener(v -> {
             String action = whatsoprDict.get(buttonId);
@@ -257,6 +264,18 @@ public class MainActivity extends AppCompatActivity {
                 if (hasSlider.get(buttonId)) {
                     seekBar.setVisibility(View.INVISIBLE);
                 }
+                if (buttonId == R.id.button_cut) {
+                    CropOverlayView cropOverlay = findViewById(R.id.crop_overlay);
+                    cropOverlay.setVisibility(View.GONE);
+                    if (!changesApplied) {
+                        button_save.setEnabled(false);
+                        button_save.setTextColor(getResources().getColor(R.color.text_disable));
+                    } else {
+                        button_save.setEnabled(true);
+                        button_save.setTextColor(getResources().getColor(R.color.text_default));
+                    }
+                }
+
                 return;
             }
 
@@ -415,63 +434,42 @@ public class MainActivity extends AppCompatActivity {
     private void performCutOperation() {
         CropOverlayView cropOverlay = findViewById(R.id.crop_overlay);
         PhotoView photoView = findViewById(R.id.photo_view);
+        final Button button_save = findViewById(R.id.button_save);
+        TextView whatopr = findViewById(R.id.WhatsOperations);
 
         if (mCurrentBitmap == null) {
             Toast.makeText(this, "Сначала выберите изображение", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        DrawingView drawingView = findViewById(R.id.drawing_view);
-        if (drawingView != null) {
-            drawingView.setVisibility(View.GONE);
-            drawingView.setDrawingEnabled(false);
-        }
-
         if (cropOverlay.getVisibility() == View.VISIBLE) {
-            // Применяем обрезку
-            RectF cropRect = cropOverlay.getCropRect();
-
-            float viewWidth = photoView.getWidth();
-            float viewHeight = photoView.getHeight();
-            float imageWidth = mCurrentBitmap.getWidth();
-            float imageHeight = mCurrentBitmap.getHeight();
-
-            float scaleX = imageWidth / viewWidth;
-            float scaleY = imageHeight / viewHeight;
-
-            int left = Math.max(0, (int) (cropRect.left * scaleX));
-            int top = Math.max(0, (int) (cropRect.top * scaleY));
-            int width = Math.min((int) (cropRect.width() * scaleX), mCurrentBitmap.getWidth() - left);
-            int height = Math.min((int) (cropRect.height() * scaleY), mCurrentBitmap.getHeight() - top);
-
-            try {
-                Bitmap croppedBitmap = Bitmap.createBitmap(
-                        mCurrentBitmap,
-                        left,
-                        top,
-                        width,
-                        height
-                );
-
-                mCurrentBitmap = croppedBitmap;
-                photoView.setImageBitmap(mCurrentBitmap);
+            RectF currentCropRect = cropOverlay.getCropRect();
+            if (lastCropRect != null && currentCropRect.equals(lastCropRect)) {
                 cropOverlay.setVisibility(View.GONE);
-
-                hasChanges = true;
-                changesApplied = false;
-                enableSaveButton();
-            } catch (IllegalArgumentException e) {
-                Toast.makeText(this, "Ошибка при обрезке изображения", Toast.LENGTH_SHORT).show();
+                isCropActive = false;
+                lastCropRect = null;
+                if (changesApplied) {
+                    button_save.setEnabled(true);
+                    button_save.setTextColor(getResources().getColor(R.color.text_default));
+                } else {
+                    button_save.setEnabled(false);
+                    button_save.setTextColor(getResources().getColor(R.color.text_disable));
+                }
+                return;
             }
-        } else {
-            cropOverlay.setVisibility(View.VISIBLE);
-            cropOverlay.resetCropRect();
-            cropOverlay.setOnCropChangeListener(rect -> {
+        }
+        cropOverlay.setVisibility(View.VISIBLE);
+        cropOverlay.resetCropRect();
+        isCropActive = true;
+        lastCropRect = new RectF(cropOverlay.getCropRect());
+        cropOverlay.setOnCropChangeListener(rect -> {
+            if (lastCropRect == null || !rect.equals(lastCropRect)) {
                 hasChanges = true;
                 changesApplied = false;
-                enableSaveButton();
-            });
-        }
+                button_save.setEnabled(true);
+                button_save.setTextColor(getResources().getColor(R.color.text_enable));
+                lastCropRect = new RectF(rect);
+            }
+        });
     }
 
     private void performRotateOperation() {
